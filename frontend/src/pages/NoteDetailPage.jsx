@@ -33,6 +33,39 @@ const NoteDetailPage = () => {
   }, [id])
 
   const handleDelete = async () => {
+   
+    if(!window.confirm("Are you sure you want to delete this note?")) {
+       return;
+    }
+    
+    try{
+      await api.delete(`/notes/${id}`);
+      toast.success("Note deleted successfully");
+      navigate("/");
+      
+    } catch(error){
+      console.log("Error deleting note", error);
+      toast.error("Failed to delete note");
+    }
+  };
+
+  const handleSave = async () => {
+   if(!note.title.trim() || !note.content.trim()) {
+    toast.error("Please add a Title and Content");
+    return;
+   }
+
+   setSaving(true);
+   try{
+    await api.put(`/notes/${id}`, note);
+    toast.success("Note updated successfully");
+    navigate("/");
+   } catch(error){
+    console.log("Error updating note", error);
+    toast.error("Failed to update note");
+   } finally{
+    setSaving(false)
+   }
 
   }
   
@@ -53,7 +86,7 @@ const NoteDetailPage = () => {
            <ArrowLeftIcon className="w-5 h-5" />
            Back to Notes
           </Link>
-           <button onClick={() => handleDelete } className=' btn btn-error btn-outline'>
+           <button onClick={handleDelete} className=' btn btn-error btn-outline'>
               <Trash2Icon className='size-5' />
               Delete Note
             </button>
@@ -83,6 +116,12 @@ const NoteDetailPage = () => {
                   value={note.content}
                   onChange={(e) => setNote({ ...note, content: e.target.value})}
                   /> 
+                </div>
+
+                <div className="justify-end card-actions">
+                  <button type="submit" className="btn btn-primary" disabled={saving} onClick={handleSave}>
+                    {saving ? "Saving..." : "Save Changes"}
+                  </button>
                 </div>
                 
               
